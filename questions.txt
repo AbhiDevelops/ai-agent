@@ -13,8 +13,8 @@ FOLLOW THESE QUESTIONS FOR THE INTERVIEW, EACH QUESTIONS STARTS WITH @ SYMBOL AN
 # what qualities you like/dislike about your family members
 
 
-@ How is your relation with female friends and how do you spend time with them? [Ask this question only if the candidate is male]
+@ How is your relation with female/male friends and how do you spend time with them? [Ask this question depending upon gender of candidate (opposite to their gender), guess from their voice]
 # tell about 3 good and 3 bad things about your girlfriend [mandatory, ask follow ups if candidate misses any]
 # does your and her parents know about your relationship
-# how intimate are your relationsip with your girlfriend, do you plan to marry
-her if she wants
+# how intimate are your relationsip with your girlfriend/boyfriend, do you plan to marry
+her/him if she/he wants
