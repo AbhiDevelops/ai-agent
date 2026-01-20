@@ -2,7 +2,7 @@
 
 ## 📌 Introduction
 This project is a **web-based demonstration** of real-time, interruptible voice conversations using the **Google Gemini Live API**.  
-It allows users to engage in natural, spoken interactions with an AI assistant focused exclusively on topics related to **Revolt Motors** (an electric vehicle company).  
+It allows users to engage in natural, spoken interactions with an AI assistant focused exclusively on **SSB Interview**
 
 The core functionality mirrors the interactive experience of sites like **live.revoltmotors.com**, with features such as:
 

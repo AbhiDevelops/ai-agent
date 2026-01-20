@@ -2,6 +2,7 @@ const talkButton = document.getElementById('talk-button');
 const statusText = document.getElementById('status-text');
 const statusLight = document.getElementById('status-light');
 const responseDiv = document.getElementById('response');
+const bodyElement = document.querySelector('body');
 
 let socket;
 let isListening = false;
@@ -13,6 +14,7 @@ let audioQueue = [];
 let isPlaying = false;
 let currentSource = null;
 let nextStartTime = 0;
+let userContent = ""
 
 // --- UI Update Logic ---
 function updateStatus(text, lightClass) {
@@ -153,7 +155,7 @@ async function startListening() {
     }
 
     if (!socket || socket.readyState !== WebSocket.OPEN) {
-        socket = new WebSocket(`wss://${window.location.host}`);
+        socket = new WebSocket(`ws://${window.location.host}`);
 
         socket.onopen = async () => {
             console.log('WebSocket connection opened');
@@ -168,7 +170,10 @@ async function startListening() {
                 const message = JSON.parse(event.data);
 
                 if (message.type === 'ai-response') {
-                    responseDiv.textContent += message.text;
+                    
+                        userContent = ""
+                        responseDiv.textContent = message.text;
+                    
                 } else if (message.type === 'ai-audio') {
                     const byteCharacters = atob(message.data);
                     const byteNumbers = new Array(byteCharacters.length);
@@ -188,9 +193,20 @@ async function startListening() {
                     isPlaying = false;
                     nextStartTime = 0;
                     updateStatus('Listening...', 'listening');
-                } else if (message.type === 'error') {
+                    
+                } 
+                else if(message.type == 'user-partial')
+                {
+                    userContent+= message.text ;
+                    responseDiv.textContent = userContent;
+                }
+                else if (message.type === 'error') {
                     console.error('Server error:', message.data);
                     updateStatus(`Error: ${message.data}`, 'idle');
+                }
+                else if(message.type === 'change-theme')
+                {
+                    changeBackgroundColor(message.data)
                 }
             } catch (e) {
                 console.error('Failed to process message from server:', e, event.data);
@@ -246,3 +262,10 @@ talkButton.addEventListener('click', () => {
         stopListening();
     }
 });
+
+function changeBackgroundColor(theme)
+{
+    console.log(`changing theme to ${theme}`);
+    
+   window.alert("Now changed background => " + theme);
+}
