@@ -134,6 +134,17 @@ header p {
     animation: pulseGlow 1.5s infinite;
 }
 
+#status-light.unstable{
+     background-color: #d0cc57;
+    box-shadow: 0 0 20px #b2ca59;
+    animation: pulseGlow 1.5s infinite;
+}
+
+#status-light.offline{
+     background-color: #e55922;
+    box-shadow: 0 0 20px #da8349;
+    animation: pulseGlow 1.5s infinite;
+}
 #status-light.speaking {
     background-color: #2196F3;
     box-shadow: 0 0 20px #2196F3;

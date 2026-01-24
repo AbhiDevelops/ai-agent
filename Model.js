@@ -9,7 +9,8 @@ const turnSchema = new mongoose.Schema({
 // 2. Define the Main Conversation Schema
 const conversationSchema = new mongoose.Schema({
   sessionId: { type: String, required: true, unique: true },
-  turns: [turnSchema] // This is your array of objects
+  turns: [turnSchema], // This is your array of objects,
+  questionsAsked : [String]
 });
 
 const ModelConversation = mongoose.model('ModelConversation', conversationSchema);

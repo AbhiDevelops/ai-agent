@@ -15,6 +15,8 @@ let isPlaying = false;
 let currentSource = null;
 let nextStartTime = 0;
 let userContent = ""
+let isReconnecting = false;
+let instabilityTimeout;
 
 // --- UI Update Logic ---
 function updateStatus(text, lightClass) {
@@ -165,6 +167,7 @@ async function startListening() {
             updateStatus('Connected. Speak now!', 'listening');
         };
 
+       
         socket.onmessage = (event) => {
             try {
                 const message = JSON.parse(event.data);
@@ -208,15 +211,33 @@ async function startListening() {
                 {
                     changeBackgroundColor(message.data)
                 }
+                else if(message.type === 'connection-unstable')
+                {
+                    updateStatus("Connection Unstable",'unstable')
+                }
             } catch (e) {
                 console.error('Failed to process message from server:', e, event.data);
             }
         };
 
-        socket.onclose = () => {
-            console.log('WebSocket closed');
-            stopListening(false);
-        };
+        socket.onclose = (event) => {
+        if (event.wasClean) {
+            console.log(`[close] Connection closed cleanly, code=${event.code} reason=${event.reason}`);
+        } else {
+            // e.g. server process killed or network down
+            // event.code is usually 1006 in this case
+            isReconnecting  = true ;
+            updateStatus("Connection lost, trying to reconnect...", 'offline')
+            console.error('[close] Connection died');
+        }
+
+        // Trigger UI updates (e.g., disable the 'Ask' button)
+        stopListening(true)
+        updateStatus("Interview Ended by user!!!", 'idle')
+        const element = document.getElementById('interviewBtn')
+        if(element !== null)
+             element.disabled = true;
+};
 
         socket.onerror = (error) => {
             console.error('WebSocket error:', error);

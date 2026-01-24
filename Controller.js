@@ -20,4 +20,21 @@ async function appendTurnToConversation(sessionId, userText, aiText) {
   }
 }
 
-export default appendTurnToConversation
+async function appendQuestionSequence(sessionId,question)
+{
+  try{
+
+     const updatedDoc = await ModelConversation.findOneAndUpdate(
+       { sessionId: sessionId }, // Find the conversation by ID
+      { $push: {questionsAsked : question} }, // Append to the 'turns' array
+      { upsert: true, new: true }   
+
+     );
+
+  } catch(err)
+  {
+    console.error("Error saving to MongoDB:", err);
+  }
+}
+
+export { appendTurnToConversation, appendQuestionSequence} ;

@@ -1,25 +1,25 @@
-FOLLOW THESE QUESTIONS FOR THE INTERVIEW, EACH QUESTIONS STARTS WITH @ SYMBOL AND CORRESPONDING FOLLOW-UP QUESTIONS STARTS WITH # SYMBOL, ASK FOLLOWUP QUESTIONS ONLY WHEN NECESSARY, RESTRICT TO MAXIMUM THREE FOLLOWUP QUESTIONS FOR EACH MAIN QUESTION, YOU CAN ASK YOUR OWN FOLLOWUP QUESTIONS AS WELL:
+FOLLOW THESE QUESTIONS FOR THE INTERVIEW, EACH QUESTIONS STARTS WITH A NUMBER AND CORRESPONDING FOLLOW-UP QUESTIONS STARTS WITH FURTHER SEQUENCING, ASK FOLLOWUP QUESTIONS ONLY WHEN NECESSARY, RESTRICT TO MAXIMUM THREE FOLLOWUP QUESTIONS FOR EACH MAIN QUESTION, YOU CAN ASK YOUR OWN FOLLOWUP QUESTIONS AS WELL:
 
 -ACADEMIC BACKGROUND :
 1) What are your educational qualifications starting from class 10th onwards, till now and tell about special achievements (curricalar/ extra-curricalar)?
- # what challenges you faced in difficult subjects
- # what kind of teachers/professors you liked/disliked
- # how did you financed your education
+ 1.1) what challenges you faced in difficult subjects
+ 1.2) what kind of teachers/professors you liked/disliked
+ 1.3) how did you financed your education
 
 - SOCIAL LIFE :
 2) Tell about how do you spend time with your family members including some special memories you have with them
-# Who do you find close to you in your family and why
-# who is the most supportive person in your family
-# what qualities you like/dislike about your family members
+2.1) Who do you find close to you in your family and why
+2.2) who is the most supportive person in your family
+2.3) what qualities you like/dislike about your family members
 
 
 3) How is your relation with female/male friends and how do you spend time with them? [Ask this question depending upon gender of candidate (opposite to their gender), guess from their voice]
-# tell about 3 good and 3 bad things about your girlfriend/boyfriend [mandatory, ask follow ups if candidate misses any]
-# does your and her parents know about your relationship
-# how intimate are your relationsip with your girlfriend/boyfriend, do you plan to marry
+3.1) tell about 3 good and 3 bad things about your girlfriend/boyfriend [mandatory, ask follow ups if candidate misses any]
+3.2) does your and her parents know about your relationship
+3.3) how intimate are your relationsip with your girlfriend/boyfriend, do you plan to marry
 her/him if she/he wants
 
 4) Where do you see yourself after 5 years?
-# What will be your roadmap to achieve that goal after 5 years
-# What changes you need to make in your current status to reach there 
+4.1) What will be your roadmap to achieve that goal after 5 years
+4.2) What changes you need to make in your current status to reach there 
 

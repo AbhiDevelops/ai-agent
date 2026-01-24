@@ -8,33 +8,34 @@ import util from 'util'
 import ModelConversation from './Model.js';
 
 
-import appendTurnToConversation from './Controller.js';
+import {appendTurnToConversation, appendQuestionSequence} from './Controller.js';
 import connectDB from './Utility.js';
+import summarizeConversation from './summarize.js';
 dotenv.config();
 
 
 
 await connectDB()
 
-console.log('Type of Model:', typeof ModelConversation); 
-console.log('Available keys:', Object.keys(ModelConversation || {}));
+
 
 let conversationHistory = []
 let conversation = {user : "" , ai : ""}
-// const text = fs.readFileSync("questions.txt", "utf8");
-const text = "Sports based"
+const text = fs.readFileSync("questions.txt", "utf8");
+// const text = "Sports based"
 
 // --- Initialization ---
 const app = express();
 const server = http.createServer(app);
 const wss = new WebSocketServer({ server });
-
+let sessionId = "session_321"
 if (!process.env.GEMINI_API_KEY) {
     console.error("🔴 ERROR: Missing GEMINI_API_KEY in .env file!");
     process.exit(1);
 }
 
 app.use(express.static('public'));
+
 
 const controlThemes = {
     name: "change-theme",
@@ -48,16 +49,54 @@ const controlThemes = {
     }
 };
 
+const questionSequence = {
+    name : "question-number",
+    description : "Tell question number in the format : number.0 for main question and number.follow_up number for follow up questions from main question, do not call this tool if question is not asked from the given document",
+      parameters: {
+        type: "OBJECT",
+        properties: {
+            sequence: { type: "STRING", description: "sequence in format like 1.0, 2.0, 3.0, etc for main question and 1.1, 1.3, etc for follow up questions" },
+        },
+        required: ["sequence"]
+    }
+}
+
+const endInterview = {
+  name: "end-interview",
+  description: "Call this tool when the interview is fully completed.",
+  parameters: {
+    type: "OBJECT",
+    properties: {},
+    required: []
+  }
+};
+
 
 
 // --- WebSocket Connection Logic ---
 wss.on('connection', async (ws) => {
     console.log('🟢 Client connected');
 
+    ws.isAlive = true ;
+    
+    ws.on('pong', () => {
+    ws.isAlive = true;
+    const latency = Date.now() - ws.pingSentAt;
+    
+    // If latency is high, notify the user they are unstable
+    if (latency > 1000) { // 1 second threshold
+      ws.send(JSON.stringify({ 
+        type: 'connection-unstable', 
+        payload: { latency } 
+      }));
+    }
+  });
+
+
     const genAI = new GoogleGenAI(process.env.GEMINI_API_KEY);
     const model = "gemini-2.5-flash-native-audio-preview-12-2025";
     const config = {
-    tools: [{ functionDeclarations: [controlThemes] }],
+    tools: [{ functionDeclarations: [controlThemes,questionSequence,endInterview] }],
     responseModalities: [Modality.AUDIO], 
     // Enable User Speech-to-Text
   inputAudioTranscription: {
@@ -86,7 +125,9 @@ wss.on('connection', async (ws) => {
     },
     systemInstruction: {
         parts: [{
-            text: `You are Cassandra, a supportive senior interviewer taking interview for assessing personality of candidate, ask questions using this content => ${text}, finally after the end of interview, give feedback. Greet the candidate first and tell about your name.`
+            text: `You are Cassandra, a supportive senior interviewer taking interview for assessing personality of candidate, ask questions using this content => ${text}, finally after the end of interview, give feedback. Greet the candidate first and tell about your name. When the interview is fully completed, you MUST call the tool "end-interview".
+This tool takes NO arguments.
+You MUST call it exactly once.`
         }]
     }
 };
@@ -125,7 +166,7 @@ wss.on('connection', async (ws) => {
                         ws.send(JSON.stringify({ type: 'interrupted' }));
                     }
                     if (text) {
-                        console.log("AI said => " + text);
+                        // console.log("AI said => " + text);
                         
                         // ws.send(JSON.stringify({ type: 'ai-response', text }));
                     }
@@ -153,7 +194,7 @@ wss.on('connection', async (ws) => {
     if (modelTurn) {
         // This is the "End of User Turn" signal
         if (currentUserUtterance.trim() !== "") {
-            console.log("LOGGING FINAL USER TRANSCRIPT:", currentUserUtterance);
+            // console.log("LOGGING FINAL USER TRANSCRIPT:", currentUserUtterance);
             
             conversationHistory.push({
                 role: 'user', 
@@ -179,7 +220,7 @@ wss.on('connection', async (ws) => {
         if(message.serverContent?.turnComplete)
         {
             if(conversation.ai !== "" && conversation.user !== "")
-            await appendTurnToConversation("session_123", conversation.user, conversation.ai);
+            await appendTurnToConversation("session_321", conversation.user, conversation.ai);
             conversation = {ai : "" , user : ""}
         }
     }
@@ -214,13 +255,16 @@ wss.on('connection', async (ws) => {
 
     ws.on('close', () => {
         console.log('🔴 Client disconnected');
-
-        console.log("------------ CONVERSATION HISTORY -----------------") ;
+           console.log("------------ CONVERSATION HISTORY -----------------") ;
 
         for(let conversation of conversationHistory)
         {
            console.log(`${conversation.role} said: ${conversation.response}`);
         }
+
+        const summary = await summarizeConversation(conversationHistory) ;
+        summarizeConversation(conversationHistory).then((result)=> { console.log("Conversation summary : " + result)})
+     
     });
 
     ws.on('error', (error) => {
@@ -228,9 +272,23 @@ wss.on('connection', async (ws) => {
     });
 });
 
+// Check every 10 seconds if connections are still alive
+setInterval(() => {
+  wss.clients.forEach((ws) => {
+    if (ws.isAlive === false) return ws.terminate();
+
+    ws.isAlive = false;
+    ws.pingSentAt = Date.now(); // Mark the start time
+    ws.ping();
+  });
+}, 10000); // Check every 5 seconds for a responsive UI
 
 
-function handleToolCall(session, toolCall) {
+wss.on('close', () => {
+  clearInterval(interval);
+});
+
+async function handleToolCall(session, toolCall) {
     const functionResponses = [];
     let toolResult = {};
     for (const fc of toolCall.functionCalls) {
@@ -246,7 +304,38 @@ function handleToolCall(session, toolCall) {
                 response: result
             });
 
-            return { type: 'change-theme', data: fc.args.theme };
+            toolResult = { type: 'change-theme', data: fc.args.theme };
+        }
+        else if(fc.name === "question-number")
+        {
+
+             const result = { status: "successfully saved question sequence", applied: fc.args };
+            // console.log("Question number ===> " + fc.args.sequence);
+
+            await appendQuestionSequence(sessionId,fc.args.sequence)
+            functionResponses.push({
+                id: fc.id,
+                name: fc.name,
+                response: result
+            });
+        }
+        else if(fc.name === "end-interview")
+        {
+          
+            console.log("Ending the interview...");
+             console.log("------------ CONVERSATION HISTORY -----------------") ;
+            ws.close(1000, "Session ended");
+
+         const result = { status: "successfully ended interivew", applied: fc.args };
+
+            functionResponses.push({
+                id: fc.id,
+                name: fc.name,
+                response: result
+            });
+
+       
+            
         }
     }
 
