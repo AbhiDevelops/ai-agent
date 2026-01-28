@@ -96,15 +96,20 @@ wss.on('connection', async (ws) => {
     const genAI = new GoogleGenAI(process.env.GEMINI_API_KEY);
     const model = "gemini-2.5-flash-native-audio-preview-12-2025";
     const config = {
+        thinkingConfig: {
+        thinkingBudget: -1,
+       
+      },
+    
     tools: [{ functionDeclarations: [controlThemes,questionSequence,endInterview] }],
     responseModalities: [Modality.AUDIO], 
     // Enable User Speech-to-Text
   inputAudioTranscription: {
-    enabled: true,
+   
   },
   // Enable Model Speech-to-Text
   outputAudioTranscription: {
-    enabled: true,
+    
   },
    speechConfig: {
         voiceConfig: {
@@ -125,7 +130,7 @@ wss.on('connection', async (ws) => {
     },
     systemInstruction: {
         parts: [{
-            text: `You are Cassandra, a supportive senior interviewer taking interview for assessing personality of candidate, ask questions using this content => ${text}, finally after the end of interview, give feedback. Greet the candidate first and tell about your name. When the interview is fully completed, you MUST call the tool "end-interview".
+            text: `You are Cassandra, a supportive senior interviewer taking interview for assessing personality of candidate, ask questions using this content => ${text}, do not speak the question number, finally after the end of interview, give feedback. Greet the candidate first and tell about your name. When the interview is fully completed, you MUST call the tool "end-interview".
 This tool takes NO arguments.
 You MUST call it exactly once.`
         }]
@@ -253,7 +258,7 @@ You MUST call it exactly once.`
         }
     });
 
-    ws.on('close', () => {
+    ws.on('close', async() => {
         console.log('🔴 Client disconnected');
            console.log("------------ CONVERSATION HISTORY -----------------") ;
 
@@ -262,8 +267,10 @@ You MUST call it exactly once.`
            console.log(`${conversation.role} said: ${conversation.response}`);
         }
 
-        const summary = await summarizeConversation(conversationHistory) ;
-        summarizeConversation(conversationHistory).then((result)=> { console.log("Conversation summary : " + result)})
+        const summary =  await summarizeConversation(conversationHistory) ;
+        console.log(`Conversation summary => ${summary}`);
+        
+       
      
     });
 
